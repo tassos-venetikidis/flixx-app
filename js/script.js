@@ -2,8 +2,19 @@ const global = {
   currentPage: window.location.pathname,
 };
 
+function showSpinner() {
+  const spinner = document.querySelector(".spinner");
+  spinner.classList.add("show");
+}
+
+function hideSpinner() {
+  const spinner = document.querySelector(".spinner");
+  spinner.classList.remove("show");
+}
+
 // Fetch Data from TMDB API
 async function fetchAPIData(endpoint) {
+  showSpinner();
   const API_URL = "https://api.themoviedb.org/3/";
   const options = {
     method: "GET",
@@ -14,7 +25,8 @@ async function fetchAPIData(endpoint) {
     },
   };
   const response = await fetch(`${API_URL}${endpoint}?language=en-US`, options);
-  const data = response.json();
+  const data = await response.json();
+  hideSpinner();
   return data;
 }
 
@@ -73,7 +85,6 @@ function init() {
   switch (global.currentPage) {
     case "/":
     case "/index.html":
-      console.log("HOME");
       displayPopularMovies();
       break;
     case "/shows.html":
