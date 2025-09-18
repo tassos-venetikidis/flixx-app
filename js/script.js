@@ -110,6 +110,79 @@ async function displayPopularTVShows() {
   }
 }
 
+// Display Details of a Movie
+async function displayMovieDetails() {
+  const queryStringParams = new URLSearchParams(window.location.search);
+  const movieId = queryStringParams.get("id");
+  const movie = await fetchAPIData(`movie/${movieId}`);
+  const movieDetailsDiv = document.getElementById("movie-details");
+  movieDetailsDiv.innerHTML = `<div class="details-top">
+          <div>
+          ${
+            movie.poster_path
+              ? `<img
+              src="http://image.tmdb.org/t/p/w500${movie.poster_path}"
+              class="card-img-top"
+              alt="${movie.title}"
+            />`
+              : `<img
+              src="images/no-image.jpg"
+              class="card-img-top"
+              alt="${movie.title}"
+            />`
+          }
+            
+          </div>
+          <div>
+            <h2>${movie.title}</h2>
+            <p>
+              <i class="fas fa-star text-primary"></i>
+              ${movie.vote_average.toFixed(1)} / 10
+            </p>
+            <p class="text-muted">Release Date: ${movie.release_date}</p>
+            <p>
+              ${movie.overview}
+            </p>
+            <h5>Genres</h5>
+            <ul class="list-group">
+            </ul>
+            <a href="${
+              movie.homepage
+            }" target="_blank" class="btn">Visit Movie Homepage</a>
+          </div>
+        </div>
+        <div class="details-bottom">
+          <h2>Movie Info</h2>
+          <ul>
+            <li><span class="text-secondary">Budget:</span> $${movie.budget.toLocaleString(
+              "en-US"
+            )}</li>
+            <li><span class="text-secondary">Revenue:</span> $${movie.revenue.toLocaleString(
+              "en-US"
+            )}</li>
+            <li><span class="text-secondary">Runtime:</span> ${
+              movie.runtime
+            } minutes</li>
+            <li><span class="text-secondary">Status:</span> ${movie.status}</li>
+          </ul>
+          <h4>Production Companies</h4>
+          <div class="list-group">Company 1, Company 2, Company 3</div>
+        </div>`;
+  const genreList = movieDetailsDiv.querySelector("ul.list-group");
+  for (const genre of movie.genres) {
+    const genreLi = document.createElement("li");
+    genreLi.textContent = genre.name;
+    genreList.append(genreLi);
+  }
+  const productionCompaniesList =
+    movieDetailsDiv.querySelector("div.list-group");
+  let productionCompaniesString = "";
+  for (const productionCompany of movie.production_companies) {
+    productionCompaniesString += productionCompany.name + " ";
+  }
+  productionCompaniesList.textContent = productionCompaniesString;
+}
+
 // Highlight active link
 function highlightActiveLink() {
   const headerLinks = document.querySelectorAll(".main-header .nav-link");
@@ -131,7 +204,7 @@ function init() {
       displayPopularTVShows();
       break;
     case "/movie-details.html":
-      console.log("Movie Details");
+      displayMovieDetails();
       break;
     case "/tv-details.html":
       console.log("TV Details");
