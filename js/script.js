@@ -70,6 +70,46 @@ async function displayPopularMovies() {
   }
 }
 
+// Display Popular TV Shows Function
+async function displayPopularTVShows() {
+  const { results } = await fetchAPIData("tv/popular");
+  const popularTVShowsGrid = document.getElementById("popular-shows");
+  for (const result of results) {
+    const cardDiv = document.createElement("div");
+    cardDiv.classList.add("card");
+    const imageLink = document.createElement("a");
+    imageLink.setAttribute("href", `tv-details.html?id=${result.id}`);
+    const image = document.createElement("img");
+    if (result.poster_path) {
+      image.setAttribute(
+        "src",
+        `http://image.tmdb.org/t/p/w500${result.poster_path}`
+      );
+    } else {
+      image.setAttribute("src", "../images/no-image.jpg");
+    }
+    image.setAttribute("alt", `${result.name}`);
+    image.classList.add("card-img-top");
+    imageLink.append(image);
+    cardDiv.append(imageLink);
+    const cardBodyDiv = document.createElement("div");
+    cardBodyDiv.classList.add("card-body");
+    const tvShowTitleH5 = document.createElement("h5");
+    tvShowTitleH5.classList.add("card-title");
+    tvShowTitleH5.textContent = result.name;
+    cardBodyDiv.append(tvShowTitleH5);
+    const cardTextP = document.createElement("p");
+    cardTextP.classList.add("card-text");
+    const smallElement = document.createElement("small");
+    smallElement.classList.add("text-muted");
+    smallElement.textContent = `Aired ${result.first_air_date}`;
+    cardTextP.append(smallElement);
+    cardBodyDiv.append(cardTextP);
+    cardDiv.append(cardBodyDiv);
+    popularTVShowsGrid.append(cardDiv);
+  }
+}
+
 // Highlight active link
 function highlightActiveLink() {
   const headerLinks = document.querySelectorAll(".main-header .nav-link");
@@ -88,7 +128,7 @@ function init() {
       displayPopularMovies();
       break;
     case "/shows.html":
-      console.log("SHOWS");
+      displayPopularTVShows();
       break;
     case "/movie-details.html":
       console.log("Movie Details");
