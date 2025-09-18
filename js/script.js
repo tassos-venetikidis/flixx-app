@@ -12,6 +12,28 @@ function hideSpinner() {
   spinner.classList.remove("show");
 }
 
+// Display Backdrop on Details Page
+function displayBackgroundImage(typeOfResource, backgroundImageURL) {
+  const underlayDiv = document.createElement("div");
+  underlayDiv.style.backgroundImage = `url("https://image.tmdb.org/t/p/original${backgroundImageURL}")`;
+  underlayDiv.style.backgroundSize = "cover";
+  underlayDiv.style.backgroundPosition = "center";
+  underlayDiv.style.backgroundRepeat = "no-repeat";
+  underlayDiv.style.height = "100vh";
+  underlayDiv.style.width = "100vw";
+  underlayDiv.style.position = "absolute";
+  underlayDiv.style.top = "0";
+  underlayDiv.style.left = "0";
+  underlayDiv.style.zIndex = "-1";
+  underlayDiv.style.opacity = "0.1";
+
+  if (typeOfResource === "movie") {
+    document.querySelector("#movie-details").append(underlayDiv);
+  } else {
+    document.querySelector("#show-details").append(underlayDiv);
+  }
+}
+
 // Fetch Data from TMDB API
 async function fetchAPIData(endpoint) {
   showSpinner();
@@ -115,8 +137,9 @@ async function displayMovieDetails() {
   const queryStringParams = new URLSearchParams(window.location.search);
   const movieId = queryStringParams.get("id");
   const movie = await fetchAPIData(`movie/${movieId}`);
-  const movieDetailsDiv = document.getElementById("movie-details");
-  movieDetailsDiv.innerHTML = `<div class="details-top">
+  displayBackgroundImage("movie", movie.backdrop_path);
+  const div = document.createElement("div");
+  div.innerHTML = `<div class="details-top">
           <div>
           ${
             movie.poster_path
@@ -168,19 +191,19 @@ async function displayMovieDetails() {
           <h4>Production Companies</h4>
           <div class="list-group">Company 1, Company 2, Company 3</div>
         </div>`;
-  const genreList = movieDetailsDiv.querySelector("ul.list-group");
+  const genreList = div.querySelector("ul.list-group");
   for (const genre of movie.genres) {
     const genreLi = document.createElement("li");
     genreLi.textContent = genre.name;
     genreList.append(genreLi);
   }
-  const productionCompaniesList =
-    movieDetailsDiv.querySelector("div.list-group");
+  const productionCompaniesList = div.querySelector("div.list-group");
   let productionCompaniesString = "";
   for (const productionCompany of movie.production_companies) {
     productionCompaniesString += productionCompany.name + " ";
   }
   productionCompaniesList.textContent = productionCompaniesString;
+  document.querySelector("#movie-details").append(div);
 }
 
 // Highlight active link
