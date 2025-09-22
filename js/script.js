@@ -200,10 +200,81 @@ async function displayMovieDetails() {
   const productionCompaniesList = div.querySelector("div.list-group");
   let productionCompaniesString = "";
   for (const productionCompany of movie.production_companies) {
-    productionCompaniesString += productionCompany.name + " ";
+    productionCompaniesString += productionCompany.name + " / ";
   }
   productionCompaniesList.textContent = productionCompaniesString;
   document.querySelector("#movie-details").append(div);
+}
+
+// Display Details of a TV Show
+async function displayTVShowDetails() {
+  const queryStringParams = new URLSearchParams(window.location.search);
+  const showId = queryStringParams.get("id");
+  const show = await fetchAPIData(`tv/${showId}`);
+  displayBackgroundImage("tv", show.backdrop_path);
+  const div = document.createElement("div");
+  div.innerHTML = `<div class="details-top">
+          <div>
+          ${
+            show.poster_path
+              ? `<img
+              src="http://image.tmdb.org/t/p/w500${show.poster_path}"
+              class="card-img-top"
+              alt="${show.name}"
+            />`
+              : `<img
+              src="images/no-image.jpg"
+              class="card-img-top"
+              alt="${show.name}"
+            />`
+          }
+            
+          </div>
+          <div>
+            <h2>${show.name}</h2>
+            <p>
+              <i class="fas fa-star text-primary"></i>
+              ${show.vote_average.toFixed(1)} / 10
+            </p>
+            <p class="text-muted">First Air Date: ${show.first_air_date}</p>
+            <p>
+              ${show.overview}
+            </p>
+            <h5>Genres</h5>
+            <ul class="list-group">
+            </ul>
+            <a href="${
+              show.homepage
+            }" target="_blank" class="btn">Visit Show Homepage</a>
+          </div>
+        </div>
+        <div class="details-bottom">
+          <h2>Show Info</h2>
+          <ul>
+            <li><span class="text-secondary">Number of Episodes:</span> ${
+              show.number_of_episodes
+            }</li>
+            <li><span class="text-secondary">Last Episode to Air:</span> ${
+              show.last_episode_to_air.name
+            }</li>
+            <li><span class="text-secondary">Status:</span> ${show.status}</li>
+          </ul>
+          <h4>Production Companies</h4>
+          <div class="list-group">Company 1, Company 2, Company 3</div>
+        </div>`;
+  const genreList = div.querySelector("ul.list-group");
+  for (const genre of show.genres) {
+    const genreLi = document.createElement("li");
+    genreLi.textContent = genre.name;
+    genreList.append(genreLi);
+  }
+  const productionCompaniesList = div.querySelector("div.list-group");
+  let productionCompaniesString = "";
+  for (const productionCompany of show.production_companies) {
+    productionCompaniesString += productionCompany.name + " / ";
+  }
+  productionCompaniesList.textContent = productionCompaniesString;
+  document.querySelector("#show-details").append(div);
 }
 
 // Highlight active link
@@ -230,7 +301,7 @@ function init() {
       displayMovieDetails();
       break;
     case "/tv-details.html":
-      console.log("TV Details");
+      displayTVShowDetails();
       break;
     case "/search.html":
       console.log("SEARCH");
