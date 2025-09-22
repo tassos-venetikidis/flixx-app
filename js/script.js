@@ -1,5 +1,11 @@
 const global = {
   currentPage: window.location.pathname,
+  search: {
+    term: "",
+    type: "",
+    page: 1,
+    totalPages: 1,
+  },
 };
 
 function showSpinner() {
@@ -339,6 +345,19 @@ async function displayTVShowDetails() {
   document.querySelector("#show-details").append(div);
 }
 
+// Search, retrieve and display function of a movie or tv show query
+async function search() {
+  const queryStringParams = new URLSearchParams(window.location.search);
+  global.search.type = queryStringParams.get("type");
+  global.search.term = queryStringParams.get("search-term");
+
+  if (global.search.term !== "" && global.search.term !== null) {
+    // @todo make request and display results
+  } else {
+    showAlert("Please enter a search term", "alert-error");
+  }
+}
+
 // Highlight active link
 function highlightActiveLink() {
   const headerLinks = document.querySelectorAll(".main-header .nav-link");
@@ -347,6 +366,17 @@ function highlightActiveLink() {
       headerLink.classList.add("active");
     }
   }
+}
+
+// Show Alert
+function showAlert(message, className) {
+  const alertElement = document.createElement("div");
+  alertElement.classList.add("alert", className);
+  alertElement.append(document.createTextNode(message));
+  document.querySelector("#alert").append(alertElement);
+  setTimeout(() => {
+    alertElement.remove();
+  }, 4000);
 }
 
 // Initialize Application
@@ -367,7 +397,7 @@ function init() {
       displayTVShowDetails();
       break;
     case "/search.html":
-      console.log("SEARCH");
+      search();
       break;
     default:
       console.log("OTHER");
