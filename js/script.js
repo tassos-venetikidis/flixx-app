@@ -34,6 +34,68 @@ function displayBackgroundImage(typeOfResource, backgroundImageURL) {
   }
 }
 
+// Initialize Swiper Object
+function initSwiper() {
+  const swiper = new Swiper(".swiper", {
+    slidesPerView: 1,
+    spaceBetween: 30,
+    freeMode: true,
+    loop: true,
+    autoplay: {
+      delay: 4000,
+      disableOnInteraction: false,
+    },
+    breakpoints: {
+      500: {
+        slidesPerView: 2,
+      },
+      700: {
+        slidesPerView: 3,
+      },
+      1200: {
+        slidesPerView: 4,
+      },
+    },
+  });
+}
+
+// Display Slider Movies
+async function displaySlider() {
+  const { results } = await fetchAPIData("movie/now_playing");
+  const swiperWrapperDiv = document.querySelector(".swiper-wrapper");
+  for (const result of results) {
+    const slideDiv = document.createElement("div");
+    slideDiv.classList.add("swiper-slide");
+    const a = document.createElement("a");
+    a.setAttribute("href", `movie-details.html?id=${result.id}`);
+    const img = document.createElement("img");
+    if (result.poster_path) {
+      img.setAttribute(
+        "src",
+        `http://image.tmdb.org/t/p/w500${result.poster_path}`
+      );
+    } else {
+      img.setAttribute("src", "../images/no-image.jpg");
+    }
+    img.setAttribute("alt", `${result.title}`);
+    a.append(img);
+    slideDiv.append(a);
+    const slideRatingHeading = document.createElement("h4");
+    slideRatingHeading.classList.add("swiper-rating");
+    const star = document.createElement("i");
+    star.className = "fas fa-star text-secondary";
+    slideRatingHeading.append(star);
+    const ratingTextNode = document.createTextNode(
+      ` ${result.vote_average.toFixed(1)} / 10`
+    );
+    slideRatingHeading.append(ratingTextNode);
+    slideDiv.append(slideRatingHeading);
+    swiperWrapperDiv.append(slideDiv);
+  }
+
+  initSwiper();
+}
+
 // Fetch Data from TMDB API
 async function fetchAPIData(endpoint) {
   showSpinner();
@@ -292,6 +354,7 @@ function init() {
   switch (global.currentPage) {
     case "/":
     case "/index.html":
+      displaySlider();
       displayPopularMovies();
       break;
     case "/shows.html":
