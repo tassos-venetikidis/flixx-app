@@ -6,6 +6,11 @@ const global = {
     page: 1,
     totalPages: 1,
   },
+  api: {
+    apiUrl: "https://api.themoviedb.org/3/",
+    apiAuthorization:
+      "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MWM4ZDhiMDk4OGY2OGQzMTJkYWI5N2FhZTIyMDQyNiIsIm5iZiI6MTc1ODAxNDM5OC45MSwic3ViIjoiNjhjOTJiYmVjY2ZiMzM0OWE1ODA0ZjYyIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.8WVq27euFIHWkIWjsd-lVk0aGAs7yAj1hVEqJcxDsW4",
+  },
 };
 
 function showSpinner() {
@@ -105,16 +110,36 @@ async function displaySlider() {
 // Fetch Data from TMDB API
 async function fetchAPIData(endpoint) {
   showSpinner();
-  const API_URL = "https://api.themoviedb.org/3/";
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization:
-        "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MWM4ZDhiMDk4OGY2OGQzMTJkYWI5N2FhZTIyMDQyNiIsIm5iZiI6MTc1ODAxNDM5OC45MSwic3ViIjoiNjhjOTJiYmVjY2ZiMzM0OWE1ODA0ZjYyIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.8WVq27euFIHWkIWjsd-lVk0aGAs7yAj1hVEqJcxDsW4",
+      Authorization: global.api.apiAuthorization,
     },
   };
-  const response = await fetch(`${API_URL}${endpoint}?language=en-US`, options);
+  const response = await fetch(
+    `${global.api.apiUrl}${endpoint}?language=en-US`,
+    options
+  );
+  const data = await response.json();
+  hideSpinner();
+  return data;
+}
+
+// Make Request to Search
+async function searchAPIData() {
+  showSpinner();
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: global.api.apiAuthorization,
+    },
+  };
+  const response = await fetch(
+    `${global.api.apiUrl}search/${global.search.type}?query=${global.search.term}&language=en-US`,
+    options
+  );
   const data = await response.json();
   hideSpinner();
   return data;
@@ -352,7 +377,8 @@ async function search() {
   global.search.term = queryStringParams.get("search-term");
 
   if (global.search.term !== "" && global.search.term !== null) {
-    // @todo make request and display results
+    const results = await searchAPIData();
+    console.log(results);
   } else {
     showAlert("Please enter a search term", "alert-error");
   }
