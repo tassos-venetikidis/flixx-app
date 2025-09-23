@@ -5,6 +5,7 @@ const global = {
     type: "",
     page: 1,
     totalPages: 1,
+    totalResults: 0,
   },
   api: {
     apiUrl: "https://api.themoviedb.org/3/",
@@ -137,7 +138,7 @@ async function searchAPIData() {
     },
   };
   const response = await fetch(
-    `${global.api.apiUrl}search/${global.search.type}?query=${global.search.term}&language=en-US`,
+    `${global.api.apiUrl}search/${global.search.type}?query=${global.search.term}&language=en-US&page=${global.search.page}`,
     options
   );
   const data = await response.json();
@@ -373,6 +374,14 @@ async function displayTVShowDetails() {
 // Display Search Results
 function displaySearchResults(results) {
   const searchResultsGrid = document.querySelector("#search-results");
+
+  // Clear previous results
+  searchResultsGrid.innerHTML = "";
+  // Clear pagination
+  document.querySelector("#pagination").innerHTML = "";
+  // Clear results heading
+  document.querySelector("#search-results-heading").innerHTML = "";
+
   for (const result of results) {
     const div = document.createElement("div");
     div.classList.add("card");
@@ -403,8 +412,47 @@ function displaySearchResults(results) {
               }</small>
             </p>
           </div>`;
+
+    document.querySelector(
+      "#search-results-heading"
+    ).innerHTML = `<h2>${results.length} OF ${global.search.totalResults} RESULTS FOR ${global.search.term}</h2>`;
     searchResultsGrid.append(div);
   }
+  displayPagination();
+}
+
+// Create and Display Pagination of Search Results
+function displayPagination() {
+  const div = document.createElement("div");
+  div.classList.add("pagination");
+  div.innerHTML = `<button class="btn btn-primary" id="prev">Prev</button>
+          <button class="btn btn-primary" id="next">Next</button>
+          <div class="page-counter">Page ${global.search.page} of ${global.search.totalPages}</div>`;
+  document.querySelector("#pagination").append(div);
+
+  // Disable prev button if at first page
+  if (global.search.page === 1) {
+    document.querySelector("#prev").disabled = true;
+  }
+  // Disable next button if on last page
+  if (global.search.page === global.search.totalPages) {
+    document.querySelector("#next").disabled = true;
+  }
+
+  // Next Page
+  document.querySelector("#next").addEventListener("click", async () => {
+    global.search.page++;
+    const { results, total_pages } = await searchAPIData();
+    displaySearchResults(results);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  // Previous Page
+  document.querySelector("#prev").addEventListener("click", async () => {
+    global.search.page--;
+    const { results, total_pages } = await searchAPIData();
+    displaySearchResults(results);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 }
 
 // Search and retrieve function of a movie or tv show query
@@ -414,7 +462,10 @@ async function search() {
   global.search.term = queryStringParams.get("search-term");
 
   if (global.search.term !== "" && global.search.term !== null) {
-    const { results, total_pages, page } = await searchAPIData();
+    const { results, total_pages, page, total_results } = await searchAPIData();
+    global.search.totalPages = total_pages;
+    global.search.page = page;
+    global.search.totalResults = total_results;
     if (results.length === 0) {
       showAlert("No results found. 😔");
       return;
