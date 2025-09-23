@@ -126,7 +126,7 @@ async function fetchAPIData(endpoint) {
   return data;
 }
 
-// Make Request to Search
+// Make Request to Search and Return Data
 async function searchAPIData() {
   showSpinner();
   const options = {
@@ -370,17 +370,60 @@ async function displayTVShowDetails() {
   document.querySelector("#show-details").append(div);
 }
 
-// Search, retrieve and display function of a movie or tv show query
+// Display Search Results
+function displaySearchResults(results) {
+  const searchResultsGrid = document.querySelector("#search-results");
+  for (const result of results) {
+    const div = document.createElement("div");
+    div.classList.add("card");
+    div.innerHTML = `<a href="${global.search.type}-details.html?id=${
+      result.id
+    }">
+    ${
+      result.poster_path
+        ? `<img src="http://image.tmdb.org/t/p/w500${
+            result.poster_path
+          }" class="card-img-top" alt="${
+            global.search.type === "movie" ? result.title : result.name
+          }" />`
+        : `<img src="images/no-image.jpg" class="card-img-top" alt="${
+            global.search.type === "movie" ? result.title : result.name
+          }" />`
+    }
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${
+              global.search.type === "movie" ? result.title : result.name
+            }</h5>
+            <p class="card-text">
+              <small class="text-muted">${
+                global.search.type === "movie"
+                  ? `Release: ${result.release_date}`
+                  : `First Air Date: ${result.first_air_date}`
+              }</small>
+            </p>
+          </div>`;
+    searchResultsGrid.append(div);
+  }
+}
+
+// Search and retrieve function of a movie or tv show query
 async function search() {
   const queryStringParams = new URLSearchParams(window.location.search);
   global.search.type = queryStringParams.get("type");
   global.search.term = queryStringParams.get("search-term");
 
   if (global.search.term !== "" && global.search.term !== null) {
-    const results = await searchAPIData();
-    console.log(results);
+    const { results, total_pages, page } = await searchAPIData();
+    if (results.length === 0) {
+      showAlert("No results found. 😔");
+      return;
+    } else {
+      displaySearchResults(results);
+      document.querySelector("#search-term").value = "";
+    }
   } else {
-    showAlert("Please enter a search term", "alert-error");
+    showAlert("Please enter a search term", "error");
   }
 }
 
@@ -395,7 +438,7 @@ function highlightActiveLink() {
 }
 
 // Show Alert
-function showAlert(message, className) {
+function showAlert(message, className = "error") {
   const alertElement = document.createElement("div");
   alertElement.classList.add("alert", className);
   alertElement.append(document.createTextNode(message));
